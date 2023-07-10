@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 """
-define asynchronous coroutine
+define asynchronous coroutine that takes in an integer argument
+named wait_random that waits for seconds and eventually returns it.
 """
 
 import random
