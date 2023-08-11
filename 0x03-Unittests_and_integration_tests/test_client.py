@@ -139,3 +139,17 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         self.assertEqual(repos, self.expected_repos)
         self.mock_get.assert_called_with(self.org_payload["repos_url"])
         self.assertEqual(self.mock_get.call_count, 2)
+
+    def test_public_repos(self):
+        """Tests the public_repos method."""
+        self.assertEqual(
+            GithubOrgClient("google").public_repos(),
+            self.expected_repos,
+        )
+
+    def test_public_repos_with_license(self):
+        """Tests the public_repos method with a license filter."""
+        self.assertEqual(
+            GithubOrgClient("google").public_repos(license="apache-2.0"),
+            self.apache2_repos,
+        )
