@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test case for client Module"""
 
+from fixtures import TEST_PAYLOAD
 import unittest
 from client import GithubOrgClient
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from unittest.mock import (
         patch,
         MagicMock,
@@ -94,3 +95,44 @@ class TestGithubOrgClient(unittest.TestCase):
         result = client_instance.has_license(repo, license_key)
 
         self.assertEqual(result, expected_result)
+
+
+@parameterized_class([
+    {
+        'org_payload': TEST_PAYLOAD[0][0],
+        'repos_payload': TEST_PAYLOAD[0][1],
+        'expected_repos': TEST_PAYLOAD[0][2],
+        'apache2_repos': TEST_PAYLOAD[0][3],
+    },
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """
+    Integration Test case for GithubOrgClient class methods
+    """
+    @classmethod
+    def setUpClass(cls):
+        """Set up the integration test environment"""
+        cls.get_patcher = patch('client.get_json')
+        cls.mock_get_json = cls.get_patcher.start()
+
+        cls.mock_get_json.side_effect = [
+            cls.org_payload,
+            cls.repos_payload
+        ]
+
+    @classmethod
+    def tearDownClass(cls):
+        """Clean up the integration test environment"""
+        cls.get_patcher.stop()
+
+    def test_public_repos_integration(self):
+        """
+        Test the public_repos method of GithubOrgClient in an integration test.
+        """
+        org_name = "abc"
+        client_instance = GithubOrgClient(org_name)
+        repos = client_instance.public_repos()
+
+        self.assertEqual(repos, self.expected_repos)
+        self.mock_get_json.assert_called_with(self.org_payload["repos_url"])
+        self.assertEqual(self.mock_get_json.call_count, 2)
