@@ -8,7 +8,8 @@ from parameterized import parameterized, parameterized_class
 from unittest.mock import (
         patch,
         MagicMock,
-        PropertyMock
+        PropertyMock,
+        Mock
         )
 
 
@@ -112,12 +113,14 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up the integration test environment"""
-        cls.get_patcher = patch('client.get_json')
-        cls.mock_get_json = cls.get_patcher.start()
+        cls.get_patcher = patch('requests.get')
+        cls.mock_get = cls.get_patcher.start()
 
-        cls.mock_get_json.side_effect = [
-            cls.org_payload,
-            cls.repos_payload
+        # Define the side_effect for requests.get to return payloads
+
+        cls.mock_get.side_effect = [
+            Mock(json=lambda: cls.org_payload),
+            Mock(json=lambda: cls.repos_payload)
         ]
 
     @classmethod
@@ -134,5 +137,5 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         repos = client_instance.public_repos()
 
         self.assertEqual(repos, self.expected_repos)
-        self.mock_get_json.assert_called_with(self.org_payload["repos_url"])
-        self.assertEqual(self.mock_get_json.call_count, 2)
+        self.mock_get.assert_called_with(self.org_payload["repos_url"])
+        self.assertEqual(self.mock_get.call_count, 2)
