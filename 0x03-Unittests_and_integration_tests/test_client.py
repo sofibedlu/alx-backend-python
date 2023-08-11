@@ -4,26 +4,54 @@
 import unittest
 from client import GithubOrgClient
 from parameterized import parameterized
-from unittest.mock import patch
+from unittest.mock import (
+        patch,
+        MagicMock,
+        PropertyMock
+        )
 
 
 class TestGithubOrgClient(unittest.TestCase):
     """Test case for GithubOrgClient class methods"""
 
     @parameterized.expand([
-        ("google"),
-        ("abc")
-        ])
+        ("google",),
+        ("abc",)
+    ])
     @patch('client.get_json')
-    def test_org(self, org_name: str, mock_get_json) -> None:
+    def test_org(self, org_name, mock_get_json):
         """Test the org method of GithubOrgClient."""
-        client = GithubOrgClient(org_name)
         url_repos = "https://api.github.com/orgs/{}/repos"
         mock_get_json.return_value = {"repos_url": url_repos.format(org_name)}
 
-        org_data = client.org
+        client_instance = GithubOrgClient(org_name)
+        org_data = client_instance.org
 
         self.assertEqual(org_data["repos_url"], url_repos.format(org_name))
 
         url = "https://api.github.com/orgs/{}"
         mock_get_json.assert_called_once_with(url.format(org_name))
+
+    def test_public_repos_url(self):
+        """
+        Test the _public_repos_url property of GithubOrgClient.
+
+        The test uses the unittest.mock.patch context manager to mock the
+        behavior of the org method, ensuring a known payload is returned.
+        It then creates an instance of GithubOrgClient, accesses
+        the _public_repos_url property, and compares it with the expected
+        URL based on the mocked payload.
+        """
+        org_name = "abc"
+        expected_url = 'https://api.github.com/orgs/{}/repos'.format(org_name)
+
+        # Create a mock instance of GithubOrgClient and mock the
+        # property using PropertyMock
+        with patch('client.GithubOrgClient.org',
+                   new_callable=PropertyMock) as mock_org:
+            mock_org.return_value = {"repos_url": expected_url}
+
+            client_instance = GithubOrgClient(org_name)
+            public_repos_url = client_instance._public_repos_url
+
+            self.assertEqual(public_repos_url, expected_url)
