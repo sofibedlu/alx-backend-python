@@ -29,7 +29,7 @@ def stream_users_in_batches(batch_size):
 
 def batch_processing(batch_size):
     for batch in stream_users_in_batches(batch_size):
-        filtered_users = [user for user in batch if user['age'] > 100]
+        filtered_users = [user for user in batch if user['age'] > 25]
         # Process the filtered users
         for user in filtered_users:
             print(user)
