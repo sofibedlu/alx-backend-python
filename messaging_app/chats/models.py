@@ -4,12 +4,13 @@ import uuid
 
 class User(AbstractUser):
     user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    phone_numer = models.CharField(max_length=15, null=True)
+    phone_number = models.CharField(max_length=15, null=True)
     ROLE_CHOICES = [
         ('guest', 'Guest'),
         ('host', 'Host'),
         ('admin', 'Admin'),
     ]
+    password = models.CharField(max_length=128, null=False)
     role = models.CharField(max_length=5, choices=ROLE_CHOICES, null=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
 
