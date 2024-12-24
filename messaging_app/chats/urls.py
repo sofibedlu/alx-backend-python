@@ -1,5 +1,6 @@
 from django.urls import path, include
-from rest_framework_nested.routers import DefaultRouter, NestedDefaultRouter
+from rest_framework.routers import DefaultRouter
+from rest_framework_nested.routers import NestedDefaultRouter
 from .views import ConversationViewSet, MessageViewSet
 
 # Create the base router
@@ -15,4 +16,3 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(nested_router.urls)),
 ]
-
