@@ -22,7 +22,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ConversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(read_only=True, many=True)
-    messages = MessageSerializer(read_only=True, many=True, source='messages')
+    messages = MessageSerializer(read_only=True, many=True)
     participant_count = serializers.SerializerMethodField()
 
     class Meta:
