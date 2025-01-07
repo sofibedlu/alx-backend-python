@@ -172,6 +172,84 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Filter Messages",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/conversations/{{conversation_id}}/messages/?sender=sofi@gmail.com&start_date=2025-01-01T00:00:00Z&end_date=2025-12-31T23:59:59Z",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"conversations",
+						"{{conversation_id}}",
+						"messages",
+						""
+					],
+					"query": [
+						{
+							"key": "sender",
+							"value": "sofi@gmail.com"
+						},
+						{
+							"key": "start_date",
+							"value": "2025-01-01T00:00:00Z"
+						},
+						{
+							"key": "end_date",
+							"value": "2025-12-31T23:59:59Z"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Paginate Messages",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{base_url}}/api/conversations/{{conversation_id}}/messages/?page=1&page_size=2",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"conversations",
+						"{{conversation_id}}",
+						"messages",
+						""
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "page_size",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	],
     "variable": [
