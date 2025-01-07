@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import User, Conversation, Message
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .auth import get_tokens_for_user
 
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='get_full_name', read_only=True)
@@ -31,3 +33,8 @@ class ConversationSerializer(serializers.ModelSerializer):
 
     def get_participant_count(self, obj):
         return obj.participants.count()
+    
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        return get_tokens_for_user(user)
