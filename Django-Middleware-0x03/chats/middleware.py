@@ -3,6 +3,9 @@ from datetime import datetime, time
 from django.utils import timezone
 from django.http import HttpResponseForbidden
 from collections import defaultdict
+import re
+#from rest_framework_simplejwt.authentication import JWTAuthentication
+#from rest_framework_simplejwt.exceptions import InvalidToken, AuthenticationFailed
 
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
@@ -76,3 +79,42 @@ class OffensiveLanguageMiddleware:
         else:
             ip = request.META.get('REMOTE_ADDR')
         return ip
+
+class RolepermissionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # Define paths using regular expressions and their allowed roles
+        self.protected_paths = {
+            r'^/api/conversations/$': ['admin'],  # Only admin can access the list of conversations
+        }
+
+        # Initialize JWT Authentication this is for testing perposes because in jwt auth is handled after the middleware
+        #self.jwt_authenticator = JWTAuthentication()
+
+    def __call__(self, request):
+        # Manually authenticate the user, this is for testing perposes because in jwt auth is handled after the middleware
+        # authentication should be handled someware else other than middleware or use permission classes
+        """
+        try:
+            # This will return a tuple of (user, validated token)
+            user_auth_tuple = self.jwt_authenticator.authenticate(request)
+            if user_auth_tuple:
+                request.user, _ = user_auth_tuple
+        except (InvalidToken, AuthenticationFailed) as e:
+            # If token is invalid, leave user as AnonymousUser
+            pass
+        """
+
+        path = request.path
+        user = request.user
+
+        for path_pattern, roles in self.protected_paths.items():
+            if re.match(path_pattern, path):
+                if not user.is_authenticated:
+                    return HttpResponseForbidden("You must be logged in to access this resource.")
+                if not hasattr(user, 'role') or user.role not in roles:
+                    return HttpResponseForbidden("You do not have permission to perform this action.")
+                break
+
+        response = self.get_response(request)
+        return response
