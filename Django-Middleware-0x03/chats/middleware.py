@@ -23,6 +23,10 @@ class RequestLoggingMiddleware:
         path = request.path
         logging.info('', extra={'user': user, 'path': path})
         response = self.get_response(request)
+
+        # Modify the response by adding a custom header
+        response['X-Processed-By'] = 'RequestLoggingMiddleware'
+
         return response
     
 class RestrictAccessByTimeMiddleware:
