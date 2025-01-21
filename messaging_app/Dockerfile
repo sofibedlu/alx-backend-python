@@ -1,4 +1,5 @@
-# Use the official Python image as the base
+# Use the official Python image as the base 
+# I used this version specifically because its the same version I have on my local machine for vertual env
 FROM python:3.8.10
 
 # Set environment variables
