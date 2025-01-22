@@ -9,6 +9,11 @@ ENV PYTHONUNBUFFERED=1
 # Set work directory
 WORKDIR /app
 
+# Install MySQL development dependencies
+RUN apt-get update && apt-get install -y \
+    default-libmysqlclient-dev gcc \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies
 COPY requirements.txt /app/
 RUN pip install --upgrade pip
