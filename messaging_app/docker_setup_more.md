@@ -337,7 +337,7 @@ Here are some fundamental Docker commands to manage your containers, images, vol
     If health checks are configured, you can view the health status of services.
 
     ```sh
-    docker-compose ps
+    docker compose ps
     ```
 
     **Sample Output:**
@@ -358,13 +358,13 @@ Here are some fundamental Docker commands to manage your containers, images, vol
     - **Default Behavior:**
 
         ```sh
-        docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d
+        docker compose -f docker-compose.yml -f docker-compose.override.yml up -d
         ```
 
     - **Custom Override:**
 
         ```sh
-        docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+        docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
         ```
 
 #### **7. Viewing and Managing Docker Resources**
@@ -399,7 +399,7 @@ Here are some fundamental Docker commands to manage your containers, images, vol
 
     ```sh
     docker --version
-    docker-compose --version
+    docker compose --version
     ```
 
 - **View Docker Disk Usage**
@@ -421,7 +421,7 @@ Here are some fundamental Docker commands to manage your containers, images, vol
     Adjust the number of container instances for a service.
 
     ```sh
-    docker-compose up --scale web=3 -d
+    docker compose up --scale web=3 -d
     ```
 
     - **Example:** Scales the `web` service to 3 instances.
@@ -431,7 +431,7 @@ Here are some fundamental Docker commands to manage your containers, images, vol
     Reduce the service to its default scale (defined in [docker-compose.yml](http://_vscodecontentref_/1)).
 
     ```sh
-    docker-compose up --scale web=1 -d
+    docker compose up --scale web=1 -d
     ```
 
 #### **10. Cleaning Up Docker Resources**
