@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         VENV_DIR = 'venv'
+        DOCKER_IMAGE = 'sofib/messaging-app' // The Docker image name
+        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials' // The ID you set for Docker Hub credentials
     }
 
     stages {
@@ -31,6 +33,30 @@ pipeline {
                 pytest --junitxml=reports/test-results.xml
                 '''
                 junit 'reports/test-results.xml'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image
+                    sh "docker build -t ${DOCKER_IMAGE}:latest ."
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Login to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        '''
+                    }
+                    // Push the Docker image to Docker Hub
+                    sh "docker push ${DOCKER_IMAGE}:latest"
+                }
             }
         }
     }
