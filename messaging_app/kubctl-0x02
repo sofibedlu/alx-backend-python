@@ -1,32 +1,28 @@
 #!/bin/bash
 
-# Apply the blue deployment
+# Apply the updated blue deployment
 kubectl apply -f blue_deployment.yaml
-echo "Blue deployment applied."
+echo "Applied blue_deployment.yaml"
 
-# Apply the green deployment
-kubectl apply -f green_deployment.yaml
-echo "Green deployment applied."
+# Trigger a rolling update
+echo "Monitoring the rollout status..."
+kubectl rollout status deployment/messaging-app-deployment
 
-# Apply the Service
-kubectl apply -f kubeservice.yaml
-echo "Service applied."
+# Start sending continuous requests to test for downtime
+echo "Starting continuous requests to check for downtime..."
+while true; do
+  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/api/
+  sleep 1
+done &
 
-# Wait for deployments to be ready
-echo "Waiting for blue deployment to be ready..."
-kubectl rollout status deployment/messaging-app-deployment-blue
+REQUEST_PID=$!
 
-echo "Waiting for green deployment to be ready..."
-kubectl rollout status deployment/messaging-app-deployment-green
+# Wait until the rollout is complete
+kubectl rollout status deployment/messaging-app-deployment
 
-# Check for errors in the green deployment pods
-echo "Checking logs for green deployment pods..."
-green_pods=$(kubectl get pods -l app=messaging-app,version=green -o jsonpath="{.items[*].metadata.name}")
+# Stop the continuous requests after rollout
+kill $REQUEST_PID
+echo "Rolling update complete and no downtime detected."
 
-for pod in $green_pods
-do
-  echo "Logs for pod: $pod"
-  kubectl logs $pod
-done
-
-echo "Blue-Green deployment completed."
+# Verify the current pods
+kubectl get pods

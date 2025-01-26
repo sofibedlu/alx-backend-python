@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: messaging-app
-        image: messaging-app:latest
+        image: messaging-app:2.0
         ports:
         - containerPort: 8000
         env:
@@ -40,16 +40,3 @@ spec:
             secretKeyRef:
               name: mysql-secret
               key: MYSQL_ROOT_PASSWORD
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: messaging-app-service
-spec:
-  selector:
-    app: messaging-app
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 8000
-  type: ClusterIP
