@@ -27,9 +27,20 @@ fi
 echo "Starting Minikube..."
 minikube start
 
+# Check if the cluster started successfully
+if [ $? -ne 0 ]; then
+    echo "Failed to start Minikube. Please check the error logs above."
+    exit 1
+fi
+
 # Verify that the cluster is running
 echo "Verifying that the cluster is running..."
 kubectl cluster-info
+
+if [ $? -ne 0 ]; then
+    echo "Kubernetes cluster is not running correctly. Please check Minikube and kubectl configuration."
+    exit 1
+fi
 
 # Retrieve the available pods
 echo "Retrieving available pods..."
