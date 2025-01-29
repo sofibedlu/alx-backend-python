@@ -7,6 +7,8 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     edited = models.BooleanField(default=False)  # New field to track edits
+    edited_at = models.DateTimeField(null=True, blank=True)  # Track when the message was last edited
+    edited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='edited_messages')  # Track who edited the message
 
     def __str__(self):
         return f'From {self.sender} to {self.receiver} at {self.timestamp}'
@@ -24,6 +26,7 @@ class MessageHistory(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='history')
     old_content = models.TextField()
     edit_timestamp = models.DateTimeField(auto_now_add=True)
+    edited_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Track who made the edit
 
     def __str__(self):
         return f"History for Message {self.message.id} at {self.edit_timestamp}"
