@@ -6,7 +6,14 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404
 from .models import Message, MessageHistory
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
 def message_history(request, message_id):
+    @method_decorator(cache_page(60))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     message = get_object_or_404(Message, id=message_id)
     history = MessageHistory.objects.filter(message=message).order_by('-edit_timestamp')
     return render(request, 'message_history.html', {'message': message, 'history': history})
