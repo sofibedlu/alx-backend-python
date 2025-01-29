@@ -1,8 +1,8 @@
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_save, pre_delete, post_delete
 from django.dispatch import receiver
 from .models import Message, Notification, MessageHistory
 from django.utils import timezone
-
+from django.contrib.auth.models import User
 
 @receiver(post_save, sender=Message)
 def create_notification(sender, instance, created, **kwargs):
@@ -26,3 +26,12 @@ def log_message_history(sender, instance, **kwargs):
                 instance.edited_at = timezone.now()
         except Message.DoesNotExist:
             pass  # Message is being created, not edited
+
+@receiver(pre_delete, sender=User)
+def cleanup_user_data(sender, instance, **kwargs):
+    # Example: Log the deletion (optional)
+    print(f"Deleting user {instance.username} and all related data!")
+
+    # No need to manually delete messages/notifications/history here because:
+    # - CASCADE deletes them automatically.
+    # - This signal is just for demonstration or additional logging.
