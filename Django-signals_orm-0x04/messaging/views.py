@@ -19,3 +19,22 @@ def delete_user(request):
         logout(request)  # Log the user out after deletion
         return redirect('home')  # Redirect to a confirmation page
     return render(request, 'delete_user_confirmation.html')
+
+def threaded_conversation(request, message_id):
+    # Fetch the root message and all replies recursively
+    root_message = Message.objects.select_related('sender', 'receiver').prefetch_related(
+        'replies__sender',
+        'replies__receiver',
+    ).get(id=message_id)
+
+    return render(request, 'threaded_conversation.html', {'root_message': root_message})
+
+from django.db.models import Prefetch
+
+def get_threaded_messages():
+    # Prefetch replies recursively (up to a certain depth)
+    return Message.objects.filter(parent_message__isnull=True).prefetch_related(
+        Prefetch('replies', queryset=Message.objects.select_related('sender', 'receiver').prefetch_related(
+            Prefetch('replies', queryset=Message.objects.select_related('sender', 'receiver'))
+        ))
+    )
