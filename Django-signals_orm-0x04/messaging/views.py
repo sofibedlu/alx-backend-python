@@ -20,14 +20,20 @@ def delete_user(request):
         return redirect('home')  # Redirect to a confirmation page
     return render(request, 'delete_user_confirmation.html')
 
+from django.db.models import Q
+
 def threaded_conversation(request, message_id):
-    # Fetch the root message and all replies recursively
-    root_message = Message.objects.select_related('sender', 'receiver').prefetch_related(
+    # Ensure the user is part of the conversation (sender or receiver)
+    message = get_object_or_404(
+        Message.objects.filter(Q(sender=request.user) | Q(receiver=request.user)),
+        id=message_id
+    )
+    # Fetch the entire thread using prefetch_related
+    message = Message.objects.select_related('sender', 'receiver').prefetch_related(
         'replies__sender',
         'replies__receiver',
-    ).get(id=message_id)
-
-    return render(request, 'threaded_conversation.html', {'root_message': root_message})
+    ).get(id=message.id)
+    return render(request, 'threaded_conversation.html', {'root_message': message})
 
 from django.db.models import Prefetch
 
