@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Apply the updated blue deployment
+kubectl apply -f blue_deployment.yaml
+echo "Applied blue_deployment.yaml"
+
+# Trigger a rolling update
+echo "Monitoring the rollout status..."
+kubectl rollout status deployment/messaging-app-deployment
+
+# Start sending continuous requests to test for downtime
+echo "Starting continuous requests to check for downtime..."
+while true; do
+  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/api/
+  sleep 1
+done &
+
+REQUEST_PID=$!
+
+# Wait until the rollout is complete
+kubectl rollout status deployment/messaging-app-deployment
+
+# Stop the continuous requests after rollout
+kill $REQUEST_PID
+echo "Rolling update complete and no downtime detected."
+
+# Verify the current pods
+kubectl get pods

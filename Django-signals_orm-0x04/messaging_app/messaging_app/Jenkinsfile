@@ -1,0 +1,69 @@
+pipeline {
+    agent any
+
+    environment {
+        VENV_DIR = 'venv'
+        DOCKER_IMAGE = 'sofib/messaging-app' // The Docker image name
+        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials' // The ID you set for Docker Hub credentials
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clone the repository and checkout the specified branch
+                git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/sofibedlu/messaging_app.git'
+            }
+        }
+
+        stage('Setup Python Environment') {
+            steps {
+                sh '''
+                python3 -m venv ${VENV_DIR}
+                source ${VENV_DIR}/bin/activate
+                pip3 install --upgrade pip
+                pip3 install -r messaging_app/requirements.txt
+                '''
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh '''
+                source ${VENV_DIR}/bin/activate
+                pytest --junitxml=reports/test-results.xml
+                '''
+                junit 'reports/test-results.xml'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Build the Docker image
+                    sh "docker build -t ${DOCKER_IMAGE}:latest ."
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Login to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS_ID}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        '''
+                    }
+                    // Push the Docker image to Docker Hub
+                    sh "docker push ${DOCKER_IMAGE}:latest"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
