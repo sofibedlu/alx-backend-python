@@ -1,6 +1,16 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+class UnreadMessagesManager(models.Manager):
+    def for_user(self, user):
+        # Filter unread messages for the given user
+        return self.get_queryset().filter(
+            receiver=user,
+            read=False
+        ).select_related('sender').only(
+            'id', 'sender__username', 'content', 'timestamp'
+        )
+
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
@@ -16,6 +26,9 @@ class Message(models.Model):
         blank=True,
         related_name='replies'
     )  # Self-referential foreign key for replies
+    read = models.BooleanField(default=False)  # New field to track read/unread status
+    objects = models.Manager()  # Default manager
+    unread = UnreadMessagesManager()  # Custom manager for unread messages
 
     def __str__(self):
         return f'From {self.sender} to {self.receiver} at {self.timestamp}'
