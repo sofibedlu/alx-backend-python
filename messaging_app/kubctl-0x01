@@ -1,0 +1,30 @@
+#!/bin/bash
+# Scale the Django app deployment to 3 replicas.
+echo "Scaling deployment messaging-app-deployment to 3 replicas..."
+kubectl scale deployment messaging-app-deployment --replicas=3
+
+# Wait for the new pods to be up and running.
+echo "Waiting for pods to be ready..."
+sleep 20
+
+# Verify that the pods are running.
+echo "Current pods:"
+kubectl get pods
+
+# Get the URL of the messaging app service using minikube.
+SERVICE_URL=$(minikube service messaging-app-service --url)
+echo "Service URL: ${SERVICE_URL}"
+
+# Check if wrk is installed.
+#if ! command -v wrk &> /dev/null; then
+#    echo "wrk is not installed. Please install it from https://github.com/wg/wrk"
+#    exit 1
+#fi
+
+# Perform load testing with wrk.
+echo "Starting load test on ${SERVICE_URL}..."
+wrk -t2 -c100 -d30s ${SERVICE_URL}
+
+# Monitor resource usage.
+echo "Resource usage (pods):"
+kubectl top pods

@@ -1,31 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: messaging-app-blue
+  name: messaging-app-green
   labels:
     app: messaging-app
-    version: blue
-    current: active  # blue version is initially active
+    version: green
+    # no "current" label initially, so it does not receive traffic.
 spec:
   replicas: 2
   selector:
     matchLabels:
       app: messaging-app
-      version: blue
+      version: green
   template:
     metadata:
       labels:
         app: messaging-app
-        version: blue
-        current: active
+        version: green
     spec:
       containers:
       - name: messaging-app
-        image: messaging-app:2.0   # the new image
+        image: messaging-app-gv:latest  # use your new image version (e.g. green version)
         ports:
           - containerPort: 8000
         env:
-          # environment variables as before...
+          # same environment variables
           - name: DATABASE_HOST
             value: "mysql"
           - name: DATABASE_PORT

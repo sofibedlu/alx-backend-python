@@ -1,28 +1,26 @@
 #!/bin/bash
-
-# Apply the updated blue deployment
+# Apply blue deployment, green deployment, and service
+echo "Deploying blue version..."
 kubectl apply -f blue_deployment.yaml
-echo "Applied blue_deployment.yaml"
 
-# Trigger a rolling update
-echo "Monitoring the rollout status..."
-kubectl rollout status deployment/messaging-app-deployment
+echo "Deploying green version..."
+kubectl apply -f green_deployment.yaml
 
-# Start sending continuous requests to test for downtime
-echo "Starting continuous requests to check for downtime..."
-while true; do
-  curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8000/api/
-  sleep 1
-done &
+echo "Deploying service..."
+kubectl apply -f kubeservice.yaml
 
-REQUEST_PID=$!
+# Wait a bit for pods to start
+echo "Waiting for green pods to become ready..."
+sleep 30
 
-# Wait until the rollout is complete
-kubectl rollout status deployment/messaging-app-deployment
+# List current pods for green deployment
+echo "Green pods:"
+kubectl get pods -l version=green
 
-# Stop the continuous requests after rollout
-kill $REQUEST_PID
-echo "Rolling update complete and no downtime detected."
+# Check logs for each green pod for errors
+for pod in $(kubectl get pods -l version=green -o jsonpath="{.items[*].metadata.name}"); do
+    echo "Logs for $pod:"
+    kubectl logs $pod --tail=50
+done
 
-# Verify the current pods
-kubectl get pods
+echo "Blue-Green deployment applied. To switch traffic, update green deployment pods with label 'current: active', and remove that label from blue pods."
